@@ -12,13 +12,15 @@ import {
 import axios from "axios";
 
 
-export default function Login() {
+export default function Login({navigation}) {
+
+  var test = new Boolean
+
   const api = "https://proyectojc.com";
   const loginMethod = "api/v2/checkin/login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
   const onLogin = async () => {
     const loginApi = `${api}/${loginMethod}`;
     try {
@@ -26,10 +28,11 @@ export default function Login() {
         email: email,
         password: password,
       });
-      alert(response.data.message);
-      console.log(response);
+      test = true
+      console.log(response.data)
     } catch (error) {
       console.log(error);
+      test = false
     }
   };
 
@@ -71,8 +74,15 @@ export default function Login() {
             />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={onLogin}>
+        <TouchableOpacity style={styles.button} onPress={() => {
+          onLogin()
+          
+          console.log(test)
+        }}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Orders')}>
+          <Text style={styles.buttonText}>Go orders</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
