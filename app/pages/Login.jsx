@@ -8,45 +8,76 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  Alert,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 
-
-export default function Login({navigation}) {
-
-  var test = new Boolean
-
+export default function Login({ navigation }) {
   const api = "https://proyectojc.com";
   const loginMethod = "api/v2/checkin/login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const showAlert = (message) =>
+    Alert.alert(
+      "Revise sus datos",
+      message,
+      [
+        {
+          text: "OK",
+          onPress: () => console.log("Presionado"),
+          style: "cancel",
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () =>
+          Alert.alert(
+            "This alert was dismissed by tapping outside of the alert dialog."
+          ),
+      }
+    );
+
   const onLogin = async () => {
     const loginApi = `${api}/${loginMethod}`;
+    setLoading(true);
     try {
       const response = await axios.postForm(loginApi, {
         email: email,
         password: password,
       });
-      test = true
-      console.log(response.data)
+
+      const data = response.data;
+      setTimeout(() => {
+        setLoading(false);
+        if (data.response === true) {
+          navigation.navigate("Events", {token: data.data.token});
+          // console.log(data.data.token)
+        } else {
+          showAlert(data.message);
+        }
+      }, 1400);
     } catch (error) {
       console.log(error);
-      test = false
+      setLoading(false); // Ocultar el indicador de carga en caso de error
     }
   };
 
   return (
     <ImageBackground
-      source={require("../../assets/images/fondo-login.png")} // Asegúrate de tener una imagen de fondo
+      source={require('../../assets/images/fondo-login.png')}
       style={styles.background}
     >
       <View style={styles.container}>
-        <img
-          src="../../assets/images/logo.png"
-          width="130"
+        <Image
           style={styles.logo}
-        ></img>
+          source='../../assets/images/logo.png'
+          resizeMode="contain"
+        />
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
@@ -74,25 +105,35 @@ export default function Login({navigation}) {
             />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={() => {
-          onLogin()
-          
-          console.log(test)
-        }}>
+        <TouchableOpacity style={styles.button} onPress={onLogin}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Orders')}>
-          <Text style={styles.buttonText}>Go orders</Text>
-        </TouchableOpacity>
       </View>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1,
+  },
+
   logo: {
-    padding: 7,
-    paddingBottom: 45,
+    width: 130,
+    height: 70,
   },
 
   background: {
