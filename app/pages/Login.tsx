@@ -1,6 +1,5 @@
-// LoginScreen.js
-import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -13,16 +12,18 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
+import { useToast } from "native-base";
 
-export default function Login({ navigation }) {
+export default function Login({ navigation }: any) {
   const api = "https://proyectojc.com";
   const loginMethod = "api/v2/checkin/login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const toast = useToast(); // Aquí invocamos useToast
 
-  const showAlert = (message) =>
+  const showAlert = (message: any) =>
     Alert.alert(
       "Revise sus datos",
       message,
@@ -46,36 +47,43 @@ export default function Login({ navigation }) {
     const loginApi = `${api}/${loginMethod}`;
     setLoading(true);
     try {
-      const response = await axios.postForm(loginApi, {
+      const response = await axios.post(loginApi, {
         email: email,
         password: password,
       });
-
       const data = response.data;
-      setTimeout(() => {
-        setLoading(false);
-        if (data.response === true) {
-          navigation.navigate("Events", {token: data.data.token});
-          // console.log(data.data.token)
-        } else {
-          showAlert(data.message);
+      setLoading(false);
+      if (data.response === true) {
+        const toastDetails = {
+          title: "Account verified",
+          description: "Thanks for signing up with us.",
+          variant: "solid",
+          isClosable: true,
+          duration: 5000,
         }
-      }, 1400);
-    } catch (error) {
-      console.log(error);
-      setLoading(false); // Ocultar el indicador de carga en caso de error
+        toast.show(toastDetails);
+        
+        setTimeout(
+          () => navigation.navigate("Events", { token: data.data.token }),
+          5200
+        );
+      } else {
+        showAlert(data.message);
+      }
+    } catch (error: any) {
+      setLoading(false);
+      showAlert(error.message);
     }
   };
-
   return (
     <ImageBackground
-      source={require('../../assets/images/fondo-login.png')}
+      source={require("../../assets/images/fondo-login.png")}
       style={styles.background}
     >
       <View style={styles.container}>
         <Image
           style={styles.logo}
-          source='../../assets/images/logo.png'
+          source={require("../../assets/images/logo.png")}
           resizeMode="contain"
         />
         <TextInput
