@@ -30,9 +30,7 @@ function HomeScreen() {
     fetchInitialRoute();
   }, []);
 
-  useEffect(() => {
-    console.log("Initial Route set to:", initialRoute);
-  }, [initialRoute]);
+  useEffect(() => {}, [initialRoute]);
 
   if (!initialRoute) {
     // Aquí puedes mostrar un cargador mientras se determina la ruta inicial

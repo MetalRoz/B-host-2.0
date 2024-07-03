@@ -29,16 +29,11 @@ export default function Login({ navigation }: any) {
       [
         {
           text: "OK",
-          onPress: () => console.log("Presionado"),
           style: "cancel",
         },
       ],
       {
         cancelable: true,
-        onDismiss: () =>
-          Alert.alert(
-            "This alert was dismissed by tapping outside of the alert dialog."
-          ),
       }
     );
 
@@ -51,11 +46,10 @@ export default function Login({ navigation }: any) {
         password: password,
       });
 
-
       const data = response.data;
       setLoading(false);
       if (data.response === true) {
-        await AsyncStorage.setItem("token", data.data.token)
+        await AsyncStorage.setItem("token", data.data.token);
         navigation.navigate("Events");
       } else {
         showAlert(data.message);
