@@ -1,16 +1,47 @@
-// LoginScreen.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Login from "../pages/Login";
 import Orders from "./orders";
 import Events from "../pages/Events";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
 
-export default function HomeScreen() {
+function HomeScreen() {
+  const [initialRoute, setInitialRoute] = useState("");
+
+  useEffect(() => {
+    const fetchInitialRoute = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        if (token) {
+          setInitialRoute("Events");
+        } else {
+          setInitialRoute("Login");
+        }
+      } catch (error) {
+        console.error("Error fetching token:", error);
+        // Handle error fetching token
+        setInitialRoute("Login"); // Fallback to Login screen
+      }
+    };
+
+    fetchInitialRoute();
+  }, []);
+
+  useEffect(() => {
+    console.log("Initial Route set to:", initialRoute);
+  }, [initialRoute]);
+
+  if (!initialRoute) {
+    // Aquí puedes mostrar un cargador mientras se determina la ruta inicial
+    return null;
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName={initialRoute}
       screenOptions={{
         headerShown: false,
       }}
@@ -21,3 +52,5 @@ export default function HomeScreen() {
     </Stack.Navigator>
   );
 }
+
+export default HomeScreen;

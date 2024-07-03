@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Button, View, Text } from "react-native";
+import { Button, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Events({ route }: any) {
+export default function Events({ navigation }: any) {
   const [data, setData] = useState([]);
 
-  const consultaApi = async () => {
-    const { token } = route.params;
+  const consultaApi = async (token: any) => {
     const apiEventsLive = "https://proyectojc.com/api/v2/event/live";
-    console.log("Token usado:", token);
+    console.log(token)
 
     const options = {
       method: "POST",
@@ -29,12 +29,18 @@ export default function Events({ route }: any) {
     }
   };
 
+  const obtenerToken = async () => {
+    const tokenStorage = await AsyncStorage.getItem("token");
+    if (tokenStorage !== null) {
+      consultaApi(tokenStorage)
+    }
+  };
+
   useEffect(() => {
-    consultaApi(); // Llamar a consultaApi al montarse el componente
-  }, []); // Array vacío para ejecutar solo una vez al montarse
+    obtenerToken()
+  }, []);
 
   const renderItems = () => {
-
     if (data.length === 0) {
       return <Text>No hay datos disponibles.</Text>;
     }
@@ -50,6 +56,31 @@ export default function Events({ route }: any) {
   return (
     <View>
       <View style={{ marginTop: 20 }}>{renderItems()}</View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={async () => {
+          await AsyncStorage.removeItem("token").then(()=> {
+            navigation.navigate('Login')
+          })
+        }}
+      >
+        <Text style={styles.buttonText}>LOGOUT</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    width: "100%",
+    padding: 15,
+    backgroundColor: "#1e40ff",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

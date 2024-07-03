@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
-import { useToast } from "native-base";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login({ navigation }: any) {
   const api = "https://proyectojc.com";
@@ -21,7 +21,6 @@ export default function Login({ navigation }: any) {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const toast = useToast(); // Aquí invocamos useToast
 
   const showAlert = (message: any) =>
     Alert.alert(
@@ -47,26 +46,17 @@ export default function Login({ navigation }: any) {
     const loginApi = `${api}/${loginMethod}`;
     setLoading(true);
     try {
-      const response = await axios.post(loginApi, {
+      const response = await axios.postForm(loginApi, {
         email: email,
         password: password,
       });
+
+
       const data = response.data;
       setLoading(false);
       if (data.response === true) {
-        const toastDetails = {
-          title: "Account verified",
-          description: "Thanks for signing up with us.",
-          variant: "solid",
-          isClosable: true,
-          duration: 5000,
-        }
-        toast.show(toastDetails);
-        
-        setTimeout(
-          () => navigation.navigate("Events", { token: data.data.token }),
-          5200
-        );
+        await AsyncStorage.setItem("token", data.data.token)
+        navigation.navigate("Events");
       } else {
         showAlert(data.message);
       }
